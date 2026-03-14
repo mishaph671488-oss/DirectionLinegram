@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DirectionLine · Мессенджер</title>
+
+    <!-- Шрифты -->
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
+    <style>
+        /* Все стили без изменений (как в предыдущем ответе) */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: DimGray;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .hidden {
+            display: none !important;
+        }
+        #loginPage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: DimGray;
+        }
+        #loginPage h1 {
+            font-family: 'Bitcount Grid Double Ink', sans-serif;
+            font-size: 80px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0 10px;
+            color: #f0f0f0;
+            text-shadow: 2px 2px 0 #3a3a3a;
+        }
+        .login-container {
+            background-color: #3a3a3a;
+            padding: 40px 50px;
+            border-radius: 40px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 400px;
+            max-width: 90%;
+        }
+        .login-container h2 {
+            color: LightGrey;
+            margin: 10px 0 5px;
+            align-self: flex-start;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 40px;
+            border: 1px solid #777;
+            background-color: #2b2b2b;
+            color: white;
+            margin-bottom: 15px;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            margin: 20px 0 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .login-container button {
+            flex: 1 1 auto;
+            padding: 12px 0;
+            font-size: 18px;
+            border-radius: 40px;
+            border: none;
+            background-color: #5f9ea0;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            min-width: 100px;
+        }
+        .login-container button:hover {
+            background-color: #4f7e80;
+        }
+        .login-container button.register-btn {
+            background-color: #8a6e4b;
+        }
+        .login-container button.admin-btn {
+            background-color: #9b59b6;
+        }
+        #loginError {
+            color: #ffaaaa;
+            min-height: 24px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        #mainInterface {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        .left-panel {
+            width: 280px;
+            background-color: #2b2b2b;
+            border-right: 2px solid #5f9ea0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        .left-panel h3 {
+            color: #ccc;
+            margin: 10px 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #5f9ea0;
+            padding-bottom: 5px;
+        }
+        .friend-list, .request-list {
+            list-style: none;
+            margin: 0 10px 20px;
+        }
+        .friend-list li, .request-list li {
+            background-color: #3a3a3a;
+            margin: 5px 0;
+            padding: 10px 15px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .friend-list li:hover, .request-list li:hover {
+            background-color: #4a4a4a;
+        }
+        .friend-list li.active {
+            background-color: #5f9ea0;
+            color: white;
+            font-weight: bold;
+        }
+        .request-actions button {
+            background-color: #5f9ea0;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .request-actions button.decline {
+            background-color: #b55454;
+        }
+        .empty-list {
+            color: #aaa;
+            text-align: center;
+            margin: 10px;
+            font-style: italic;
+        }
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: DimGray;
+        }
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2b2b2b;
+            padding: 10px 30px;
+            border-bottom: 2px solid #5f9ea0;
+        }
+        .main-header h1 {
+            font-family: 'Bitcount Grid Double Ink', sans-serif;
+            font-size: 40px;
+            margin: 0;
+            color: white;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background-color: #3a3a3a;
+            padding: 8px 20px;
+            border-radius: 40px;
+        }
+        .user-info span {
+            font-weight: bold;
+            color: #a5d6a7;
+        }
+        .logout-btn {
+            background-color: #b55454;
+            border: none;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #9e3f3f;
+        }
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            background-color: #2b2b2b;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.sent {
+            align-items: flex-end;
+        }
+        .message.received {
+            align-items: flex-start;
+        }
+        .message-bubble {
+            max-width: 60%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            background-color: #3a3a3a;
+            word-wrap: break-word;
+        }
+        .message.sent .message-bubble {
+            background-color: #5f9ea0;
+            color: white;
+        }
+        .message-time {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 3px;
+        }
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background-color: #2b2b2b;
+            border-radius: 40px;
+            padding: 10px 20px;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 40px;
+            border: 1px solid #777;
+            background-color: #3a3a3a;
+            color: white;
+            font-size: 16px;
+        }
+        .chat-input-area button {
+            background-color: #5f9ea0;
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .no-chat-selected {
+            color: #aaa;
+            text-align: center;
+            margin-top: 50px;
+            font-size: 20px;
+        }
+        .status-square {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background-color: #2e7d32;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 2px solid #1e1e1e;
+            transition: background-color 0.25s;
+            z-index: 1000;
+        }
+        .status-square.problem {
+            background-color: #b71c1c;
+        }
+        .status-label {
+            position: fixed;
+            bottom: 0px;
+            right: 80px;
+            color: white;
+            font-size: 12px;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 8px;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+        .friend-note {
+            color: #aaa;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        #adminPage {
+            height: 100vh;
+            background-color: #2c3e50;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #34495e;
+            padding: 15px 30px;
+            border-radius: 60px;
+            margin-bottom: 40px;
+        }
+        .admin-header h1 {
+            font-size: 48px;
+            font-family: 'Bitcount Grid Double Ink', sans-serif;
+            color: #ecf0f1;
+        }
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background-color: #3d566e;
+            padding: 8px 25px;
+            border-radius: 40px;
+        }
+        .user-list {
+            background-color: #34495e;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        .user-list h2 {
+            color: #bdc3c7;
+            border-bottom: 2px solid #5f9ea0;
+            padding-bottom: 10px;
+        }
+        .user-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .user-list li {
+            background-color: #3d566e;
+            margin: 10px 0;
+            padding: 12px 20px;
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .user-role {
+            background-color: #2c3e50;
+            padding: 4px 15px;
+            border-radius: 30px;
+            font-size: 14px;
+        }
+        .request-list-admin {
+            background-color: #34495e;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .request-list-admin h2 {
+            color: #bdc3c7;
+            border-bottom: 2px solid #5f9ea0;
+            padding-bottom: 10px;
+        }
+        .request-list-admin ul {
+            list-style: none;
+            padding: 0;
+        }
+        .request-list-admin li {
+            background-color: #3d566e;
+            margin: 10px 0;
+            padding: 12px 20px;
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- СТРАНИЦА ВХОДА -->
+    <div id="loginPage">
+        <h1>Login</h1>
+        <div class="login-container">
+            <h2>nickname</h2>
+            <input type="text" id="regUsername" placeholder="введите никнейм">
+            <h2>password</h2>
+            <input type="password" id="regPassword" placeholder="введите пароль">
+            <div class="button-group">
+                <button id="loginBtn">Log In</button>
+                <button id="registerBtn" class="register-btn">Sign Up</button>
+                <button id="adminLoginBtn" class="admin-btn">A</button>
+            </div>
+            <div id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+    <div id="mainInterface" class="hidden">
+        <div class="left-panel">
+            <h3>Друзья</h3>
+            <ul class="friend-list" id="friendList"></ul>
+            <h3>Входящие запросы</h3>
+            <ul class="request-list" id="incomingRequests"></ul>
+            <h3>Исходящие запросы</h3>
+            <ul class="request-list" id="outgoingRequests"></ul>
+        </div>
+        <div class="right-panel">
+            <div class="main-header">
+                <h1>DirectionLine</h1>
+                <div class="user-info">
+                    <span id="currentUsername"></span>
+                    <button class="logout-btn" id="logoutBtn">logout</button>
+                </div>
+            </div>
+            <div class="chat-area">
+                <div id="messagesContainer" class="messages-container">
+                    <div class="no-chat-selected">Выберите чат слева</div>
+                </div>
+                <div class="chat-input-area" id="chatInputArea" style="display: none;">
+                    <input type="text" id="messageText" placeholder="Введите сообщение">
+                    <button id="sendMessageBtn">Отправить</button>
+                </div>
+            </div>
+            <div style="padding: 20px; border-top: 2px solid #5f9ea0; background-color: #2b2b2b;">
+                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center;">
+                    <input type="text" id="friendInput" placeholder="введите никнейм для добавления">
+                    <button id="addFriendBtn">добавить в друзья</button>
+                </div>
+                <p style="color: LightGrey; margin-top: 20px;">Никнейм Собеседника</p>
+                <h1 style="color: #ccc;">Отправить сообщение</h1>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <input type="text" id="messageInput" placeholder="текст сообщения">
+                    <button id="sendMsgBtn">Отправить</button>
+                </div>
+                <div class="friend-note">(двойной клик по списку друзей — не используется)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- АДМИН ПАНЕЛЬ -->
+    <div id="adminPage" class="hidden">
+        <div class="admin-header">
+            <h1>Admin Panel</h1>
+            <div class="admin-user">
+                <span id="adminUsername"></span>
+                <button class="logout-btn admin-logout" id="adminLogoutBtn">logout</button>
+            </div>
+        </div>
+        <div class="user-list">
+            <h2>📋 Зарегистрированные пользователи</h2>
+            <ul id="userList"></ul>
+        </div>
+        <div class="request-list-admin">
+            <h2>📨 Активные запросы в друзья</h2>
+            <ul id="adminRequestList"></ul>
+        </div>
+    </div>
+
+    <!-- статусный квадрат -->
+    <div id="statusIndicator" class="status-square ok"></div>
+    <div class="status-label">индикатор</div>
+
+    <script>
+        (function() {
+            // ---------- КЛЮЧИ ХРАНИЛИЩ ----------
+            const STORAGE_KEY = 'directionline_users';
+            const SESSION_KEY = 'directionline_session';
+            const FRIEND_REQUESTS_KEY = 'directionline_requests';
+            const FRIENDSHIPS_KEY = 'directionline_friendships';
+            const MESSAGES_KEY = 'directionline_messages';
+
+            // ---------- ДАННЫЕ ПО УМОЛЧАНИЮ ----------
+            const ADMIN_PASSWORD = '012aa#124ald_fmwx.pfmfvrdlf';
+            const ADMIN_USERNAME = 'admin';
+            const DEFAULT_FRIEND = 'mr.. walter?';
+
+            // Загружаем пользователей
+            let users = [];
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    users = JSON.parse(stored);
+                } else {
+                    users = [
+                        { username: "Underwood", password: "admin_046", role: "user" },
+                        { username: ADMIN_USERNAME, password: ADMIN_PASSWORD, role: "admin" },
+                        { username: DEFAULT_FRIEND, password: "guest", role: "user" }
+                    ];
+                }
+            } catch (e) {
+                users = [
+                    { username: "Underwood", password: "admin_046", role: "user" },
+                    { username: ADMIN_USERNAME, password: ADMIN_PASSWORD, role: "admin" },
+                    { username: DEFAULT_FRIEND, password: "guest", role: "user" }
+                ];
+            }
+
+            // Синхронизируем администратора
+            function syncAdmin() {
+                const adminIndex = users.findIndex(u => u.username.toLowerCase() === ADMIN_USERNAME.toLowerCase());
+                if (adminIndex >= 0) {
+                    users[adminIndex].password = ADMIN_PASSWORD;
+                    users[adminIndex].role = 'admin';
+                } else {
+                    users.push({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, role: 'admin' });
+                }
+                saveUsers();
+            }
+            syncAdmin();
+
+            // Загружаем запросы, друзей, сообщения
+            let friendRequests = JSON.parse(localStorage.getItem(FRIEND_REQUESTS_KEY)) || [];
+            let friendships = JSON.parse(localStorage.getItem(FRIENDSHIPS_KEY)) || [];
+            let messages = JSON.parse(localStorage.getItem(MESSAGES_KEY)) || [];
+
+            function saveUsers() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+            }
+            function saveRequests() {
+                localStorage.setItem(FRIEND_REQUESTS_KEY, JSON.stringify(friendRequests));
+            }
+            function saveFriendships() {
+                localStorage.setItem(FRIENDSHIPS_KEY, JSON.stringify(friendships));
+            }
+            function saveMessages() {
+                localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
+            }
+
+            // ---------- ТЕКУЩАЯ СЕССИЯ ----------
+            let currentSession = null;
+
+            // Элементы
+            const loginPage = document.getElementById('loginPage');
+            const mainInterface = document.getElementById('mainInterface');
+            const adminPage = document.getElementById('adminPage');
+            const loginError = document.getElementById('loginError');
+            const usernameInput = document.getElementById('regUsername');
+            const passwordInput = document.getElementById('regPassword');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const adminLoginBtn = document.getElementById('adminLoginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+            const currentUsernameSpan = document.getElementById('currentUsername');
+            const adminUsernameSpan = document.getElementById('adminUsername');
+            const userListEl = document.getElementById('userList');
+            const adminRequestListEl = document.getElementById('adminRequestList');
+            const friendListEl = document.getElementById('friendList');
+            const incomingRequestsEl = document.getElementById('incomingRequests');
+            const outgoingRequestsEl = document.getElementById('outgoingRequests');
+            const messagesContainer = document.getElementById('messagesContainer');
+            const chatInputArea = document.getElementById('chatInputArea');
+            const messageText = document.getElementById('messageText');
+            const sendMessageBtn = document.getElementById('sendMessageBtn');
+            const friendInput = document.getElementById('friendInput');
+            const addFriendBtn = document.getElementById('addFriendBtn');
+            const messageInput = document.getElementById('messageInput');
+            const sendMsgBtn = document.getElementById('sendMsgBtn');
+            const statusSquare = document.getElementById('statusIndicator');
+
+            let currentChatFriend = null;
+
+            // ---------- ТАЙМЕР АВТООБНОВЛЕНИЯ ----------
+            let refreshInterval = null;
+
+            function startAutoRefresh() {
+                if (refreshInterval) clearInterval(refreshInterval);
+                refreshInterval = setInterval(() => {
+                    location.reload();
+                }, 60000); // 60 000 мс = 1 минута
+            }
+
+            function stopAutoRefresh() {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
+                }
+            }
+
+            // ---------- ФУНКЦИИ РАБОТЫ С ПОЛЬЗОВАТЕЛЯМИ ----------
+            function findUser(username) {
+                return users.find(u => u.username.toLowerCase() === username.toLowerCase());
+            }
+
+            function register(username, password) {
+                if (!username || !password) return { success: false, message: 'Заполните все поля' };
+                if (findUser(username)) return { success: false, message: 'Пользователь уже существует' };
+                users.push({ username, password, role: 'user' });
+                saveUsers();
+
+                // Автоматический запрос от DEFAULT_FRIEND
+                const defaultUser = findUser(DEFAULT_FRIEND);
+                if (defaultUser && username !== DEFAULT_FRIEND) {
+                    const alreadyFriends = friendships.some(f =>
+                        (f.user1 === DEFAULT_FRIEND && f.user2 === username) ||
+                        (f.user1 === username && f.user2 === DEFAULT_FRIEND)
+                    );
+                    const existingRequest = friendRequests.find(r =>
+                        (r.from === DEFAULT_FRIEND && r.to === username) ||
+                        (r.from === username && r.to === DEFAULT_FRIEND)
+                    );
+                    if (!alreadyFriends && !existingRequest) {
+                        friendRequests.push({ from: DEFAULT_FRIEND, to: username, status: 'pending' });
+                        saveRequests();
+                    }
+                }
+                return { success: true, user: username };
+            }
+
+            function login(username, password) {
+                if (!username || !password) return { success: false, message: 'Заполните все поля' };
+                const user = findUser(username);
+                if (!user || user.password !== password) return { success: false, message: 'Неверный никнейм или пароль' };
+                return { success: true, user };
+            }
+
+            function setSession(user) {
+                currentSession = { username: user.username, role: user.role };
+                localStorage.setItem(SESSION_KEY, JSON.stringify(currentSession));
+                if (user.role === 'admin') {
+                    showAdminPage(user.username);
+                } else {
+                    showMainPage(user.username);
+                }
+            }
+
+            function clearSession() {
+                currentSession = null;
+                localStorage.removeItem(SESSION_KEY);
+                showLoginPage();
+            }
+
+            function loadSession() {
+                const saved = localStorage.getItem(SESSION_KEY);
+                if (saved) {
+                    try {
+                        const session = JSON.parse(saved);
+                        const user = findUser(session.username);
+                        if (user && user.role === session.role) {
+                            setSession(user);
+                            return true;
+                        }
+                    } catch (e) {}
+                }
+                return false;
+            }
+
+            function showMainPage(username) {
+                loginPage.classList.add('hidden');
+                mainInterface.classList.remove('hidden');
+                adminPage.classList.add('hidden');
+                currentUsernameSpan.textContent = username;
+                usernameInput.value = '';
+                passwordInput.value = '';
+                loginError.textContent = '';
+                setStatusOk(true);
+                renderLeftPanel();
+                renderMessages();
+                currentChatFriend = null;
+                chatInputArea.style.display = 'none';
+                messagesContainer.innerHTML = '<div class="no-chat-selected">Выберите чат слева</div>';
+                startAutoRefresh(); // запускаем автообновление
+            }
+
+            function showAdminPage(username) {
+                loginPage.classList.add('hidden');
+                mainInterface.classList.add('hidden');
+                adminPage.classList.remove('hidden');
+                adminUsernameSpan.textContent = username;
+                renderUserList();
+                renderAdminRequests();
+                startAutoRefresh(); // запускаем автообновление
+            }
+
+            function showLoginPage() {
+                loginPage.classList.remove('hidden');
+                mainInterface.classList.add('hidden');
+                adminPage.classList.add('hidden');
+                loginError.textContent = '';
+                stopAutoRefresh(); // останавливаем таймер
+            }
+
+            function renderUserList() {
+                if (!userListEl) return;
+                userListEl.innerHTML = users.map(u => `<li><span>${u.username}</span><span class="user-role">${u.role}</span></li>`).join('');
+            }
+
+            function renderAdminRequests() {
+                if (!adminRequestListEl) return;
+                if (friendRequests.length === 0) {
+                    adminRequestListEl.innerHTML = '<li class="empty-list">Нет активных запросов</li>';
+                } else {
+                    adminRequestListEl.innerHTML = friendRequests.map(r =>
+                        `<li><span>${r.from} → ${r.to}</span> <span class="user-role">ожидание</span></li>`
+                    ).join('');
+                }
+            }
+
+            // ---------- РАБОТА С ДРУЗЬЯМИ ----------
+            function getFriends(username) {
+                return friendships
+                    .filter(f => f.user1 === username || f.user2 === username)
+                    .map(f => f.user1 === username ? f.user2 : f.user1);
+            }
+
+            function getIncomingRequests(username) {
+                return friendRequests.filter(r => r.to === username && r.status === 'pending');
+            }
+
+            function getOutgoingRequests(username) {
+                return friendRequests.filter(r => r.from === username && r.status === 'pending');
+            }
+
+            function sendFriendRequest(from, to) {
+                if (from === to) return { success: false, message: 'Нельзя добавить самого себя' };
+                if (!findUser(to)) return { success: false, message: 'Пользователь не найден' };
+                const alreadyFriends = friendships.some(f => (f.user1 === from && f.user2 === to) || (f.user1 === to && f.user2 === from));
+                if (alreadyFriends) return { success: false, message: 'Уже в друзьях' };
+                const existing = friendRequests.find(r => (r.from === from && r.to === to) || (r.from === to && r.to === from));
+                if (existing) {
+                    if (existing.status === 'pending') return { success: false, message: 'Запрос уже отправлен' };
+                }
+                friendRequests.push({ from, to, status: 'pending' });
+                saveRequests();
+                return { success: true };
+            }
+
+            function acceptRequest(from, to) {
+                const reqIndex = friendRequests.findIndex(r => r.from === from && r.to === to && r.status === 'pending');
+                if (reqIndex === -1) return;
+                friendRequests.splice(reqIndex, 1);
+                friendships.push({ user1: from, user2: to });
+                saveFriendships();
+                saveRequests();
+                renderLeftPanel();
+                if (currentChatFriend === from) {
+                    // остаёмся в чате
+                }
+            }
+
+            function declineRequest(from, to) {
+                const reqIndex = friendRequests.findIndex(r => r.from === from && r.to === to && r.status === 'pending');
+                if (reqIndex === -1) return;
+                friendRequests.splice(reqIndex, 1);
+                saveRequests();
+                renderLeftPanel();
+            }
+
+            function renderLeftPanel() {
+                if (!currentSession) return;
+                const username = currentSession.username;
+                const friends = getFriends(username);
+                const incoming = getIncomingRequests(username);
+                const outgoing = getOutgoingRequests(username);
+
+                friendListEl.innerHTML = '';
+                if (friends.length === 0) {
+                    friendListEl.innerHTML = '<li class="empty-list">Нет друзей</li>';
+                } else {
+                    friends.forEach(f => {
+                        const li = document.createElement('li');
+                        li.textContent = f;
+                        li.dataset.friend = f;
+                        if (currentChatFriend === f) li.classList.add('active');
+                        li.addEventListener('click', () => openChat(f));
+                        friendListEl.appendChild(li);
+                    });
+                }
+
+                incomingRequestsEl.innerHTML = '';
+                if (incoming.length === 0) {
+                    incomingRequestsEl.innerHTML = '<li class="empty-list">Нет запросов</li>';
+                } else {
+                    incoming.forEach(req => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <span>${req.from}</span>
+                            <div class="request-actions">
+                                <button class="accept">✓</button>
+                                <button class="decline">✗</button>
+                            </div>
+                        `;
+                        li.querySelector('.accept').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            acceptRequest(req.from, username);
+                        });
+                        li.querySelector('.decline').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            declineRequest(req.from, username);
+                        });
+                        incomingRequestsEl.appendChild(li);
+                    });
+                }
+
+                outgoingRequestsEl.innerHTML = '';
+                if (outgoing.length === 0) {
+                    outgoingRequestsEl.innerHTML = '<li class="empty-list">Нет исходящих</li>';
+                } else {
+                    outgoing.forEach(req => {
+                        const li = document.createElement('li');
+                        li.textContent = req.to + ' (ожидание)';
+                        outgoingRequestsEl.appendChild(li);
+                    });
+                }
+            }
+
+            function openChat(friend) {
+                currentChatFriend = friend;
+                renderLeftPanel();
+                renderMessages();
+                chatInputArea.style.display = 'flex';
+            }
+
+            function renderMessages() {
+                if (!currentSession || !currentChatFriend) {
+                    messagesContainer.innerHTML = '<div class="no-chat-selected">Выберите чат слева</div>';
+                    return;
+                }
+                const username = currentSession.username;
+                const chatMessages = messages
+                    .filter(m => (m.from === username && m.to === currentChatFriend) || (m.from === currentChatFriend && m.to === username))
+                    .sort((a, b) => a.timestamp - b.timestamp);
+
+                messagesContainer.innerHTML = '';
+                if (chatMessages.length === 0) {
+                    messagesContainer.innerHTML = '<div class="no-chat-selected">Нет сообщений</div>';
+                } else {
+                    chatMessages.forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = `message ${m.from === username ? 'sent' : 'received'}`;
+                        div.innerHTML = `
+                            <div class="message-bubble">${m.text}</div>
+                            <div class="message-time">${new Date(m.timestamp).toLocaleTimeString()}</div>
+                        `;
+                        messagesContainer.appendChild(div);
+                    });
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            }
+
+            function sendMessage() {
+                const text = messageText.value.trim();
+                if (!text || !currentChatFriend) return;
+                const msg = {
+                    from: currentSession.username,
+                    to: currentChatFriend,
+                    text,
+                    timestamp: Date.now()
+                };
+                messages.push(msg);
+                saveMessages();
+                messageText.value = '';
+                renderMessages();
+                setStatusOk(true);
+            }
+
+            function setStatusOk(isOk) {
+                if (statusSquare) {
+                    statusSquare.classList.toggle('problem', !isOk);
+                    statusSquare.classList.toggle('ok', isOk);
+                }
+            }
+
+            // ---------- СИНХРОНИЗАЦИЯ МЕЖДУ ВКЛАДКАМИ ----------
+            function reloadDataFromStorage() {
+                // Перечитываем все данные из localStorage
+                try {
+                    const storedUsers = localStorage.getItem(STORAGE_KEY);
+                    if (storedUsers) users = JSON.parse(storedUsers);
+
+                    const storedRequests = localStorage.getItem(FRIEND_REQUESTS_KEY);
+                    if (storedRequests) friendRequests = JSON.parse(storedRequests);
+
+                    const storedFriendships = localStorage.getItem(FRIENDSHIPS_KEY);
+                    if (storedFriendships) friendships = JSON.parse(storedFriendships);
+
+                    const storedMessages = localStorage.getItem(MESSAGES_KEY);
+                    if (storedMessages) messages = JSON.parse(storedMessages);
+                } catch (e) {}
+
+                // Проверяем сессию
+                const savedSession = localStorage.getItem(SESSION_KEY);
+                if (!savedSession && currentSession) {
+                    clearSession();
+                    return;
+                }
+                if (savedSession && currentSession) {
+                    try {
+                        const session = JSON.parse(savedSession);
+                        if (session.username !== currentSession.username || session.role !== currentSession.role) {
+                            const user = findUser(session.username);
+                            if (user && user.role === session.role) {
+                                setSession(user);
+                            } else {
+                                clearSession();
+                            }
+                            return;
+                        }
+                    } catch (e) {}
+                }
+
+                // Если мы всё ещё залогинены, обновляем интерфейс
+                if (currentSession) {
+                    if (currentSession.role === 'admin') {
+                        renderUserList();
+                        renderAdminRequests();
+                    } else {
+                        renderLeftPanel();
+                        renderMessages();
+                    }
+                }
+            }
+
+            window.addEventListener('storage', (e) => {
+                const relevantKeys = [STORAGE_KEY, SESSION_KEY, FRIEND_REQUESTS_KEY, FRIENDSHIPS_KEY, MESSAGES_KEY];
+                if (relevantKeys.includes(e.key)) {
+                    reloadDataFromStorage();
+                }
+            });
+
+            // ---------- ОБРАБОТЧИКИ ----------
+            loginBtn.addEventListener('click', () => {
+                const result = login(usernameInput.value.trim(), passwordInput.value);
+                if (result.success) setSession(result.user);
+                else loginError.textContent = '✗ ' + result.message;
+            });
+
+            registerBtn.addEventListener('click', () => {
+                const result = register(usernameInput.value.trim(), passwordInput.value);
+                if (result.success) {
+                    const user = findUser(result.user);
+                    setSession(user);
+                } else loginError.textContent = '✗ ' + result.message;
+            });
+
+            adminLoginBtn.addEventListener('click', () => {
+                const result = login(usernameInput.value.trim(), passwordInput.value);
+                if (result.success) {
+                    if (result.user.role === 'admin') setSession(result.user);
+                    else loginError.textContent = '✗ Нет прав администратора';
+                } else loginError.textContent = '✗ ' + result.message;
+            });
+
+            logoutBtn.addEventListener('click', clearSession);
+            adminLogoutBtn.addEventListener('click', clearSession);
+
+            addFriendBtn.addEventListener('click', () => {
+                const target = friendInput.value.trim();
+                if (!target) {
+                    setStatusOk(false);
+                    return;
+                }
+                const result = sendFriendRequest(currentSession.username, target);
+                if (result.success) {
+                    setStatusOk(true);
+                    friendInput.value = '';
+                    renderLeftPanel(); // обновляем панель отправителя
+                } else {
+                    setStatusOk(false);
+                    alert(result.message);
+                }
+            });
+
+            sendMsgBtn.addEventListener('click', () => {
+                const msg = messageInput.value.trim();
+                if (!msg) { setStatusOk(false); return; }
+                if (currentChatFriend) {
+                    const m = {
+                        from: currentSession.username,
+                        to: currentChatFriend,
+                        text: msg,
+                        timestamp: Date.now()
+                    };
+                    messages.push(m);
+                    saveMessages();
+                    renderMessages();
+                    messageInput.value = '';
+                    setStatusOk(true);
+                } else {
+                    setStatusOk(false);
+                    alert('Сначала выберите чат');
+                }
+            });
+
+            sendMessageBtn.addEventListener('click', sendMessage);
+            messageText.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            friendInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addFriendBtn.click();
+            });
+
+            statusSquare.addEventListener('click', () => setStatusOk(true));
+
+            // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+            if (!loadSession()) {
+                showLoginPage();
+            }
+        })();
+    </script>
+</body>
+</html>
